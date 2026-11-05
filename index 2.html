@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ก.ไก่ ตอบไว!</title>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFD93D;--ink:#2B1B4A;--hot:#FF3D68;--card:#fff;--cardink:#2B1B4A;--ok:#1fa971;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2B1B4A;--ink:#FFD93D;--card:#3d2a66;--cardink:#fff}}
+:root[data-theme="dark"]{--bg:#2B1B4A;--ink:#FFD93D;--card:#3d2a66;--cardink:#fff}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:'Prompt',system-ui,sans-serif;font-weight:500;display:flex;justify-content:center}
+#app{width:100%;max-width:460px;padding:18px;display:flex;flex-direction:column;gap:12px}
+h1,h2,p{margin:0}h1{font-size:2.2rem;font-weight:800;line-height:1.1}
+.code{background:var(--ink);color:var(--bg);padding:0 10px;border-radius:10px;letter-spacing:2px}
+.card{background:var(--card);color:var(--cardink);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px}
+input,select{font:inherit;padding:12px;border-radius:12px;border:2px solid var(--ink);background:var(--card);color:var(--cardink);width:100%}
+button{font:inherit;font-weight:800;border:0;border-radius:14px;padding:14px;background:var(--ink);color:var(--bg);cursor:pointer;touch-action:manipulation}
+button.hot{background:var(--hot);color:#fff;font-size:1.2rem}
+button.ghost{background:transparent;color:var(--cardink);border:2px solid currentColor}
+button.on{background:var(--ok);color:#fff;border-color:var(--ok)}button.on.bad{background:var(--hot);border-color:var(--hot)}
+button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.rowb{display:flex;justify-content:space-between}
+.bar{display:flex;justify-content:space-between;font-weight:800}
+.letter{font-size:5.5rem;font-weight:800;text-align:center;line-height:1}.letter small{display:block;font-size:1.1rem}
+.cat{background:var(--ink);color:var(--bg);border-radius:16px;padding:14px;text-align:center;font-size:1.25rem}
+.note{font-size:.95rem;opacity:.9}.ans{font-size:1.5rem;font-weight:800}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const CATS=["เครื่องใช้ไฟฟ้า","เครื่องมือช่าง","ต้นไม้ ดอกไม้","แบรนด์เสื้อผ้า","ร้านอาหารหรือร้านกาแฟ","แอปในมือถือ","เกม","เครื่องดนตรี","ชื่อวงดนตรี","ชื่อนักกีฬา","ของเล่น","เครื่องเขียน","ของในครัว","สัตว์น้ำ","แมลง","สถานที่ในกรุงเทพ","ชื่อมหาวิทยาลัย","วิชาในโรงเรียน","สกุลเงิน","ธนาคาร","แม่น้ำหรือภูเขา","เมนูข้าว","อาหารอีสาน","ขนมไทย","ท็อปปิ้งหรือไอศกรีม","ยี่ห้อมือถือ","ยี่ห้อรถ","สายการบิน","ตัวละครในนิทาน","อวัยวะในร่างกาย","โรคหรืออาการป่วย","เทศกาล","คำที่พูดตอนโกรธ","สิ่งที่ทำให้ง่วง","สิ่งที่ซื้อในห้าง","ผลไม้ที่แพง","สิ่งที่อยู่ในออฟฟิศ","ชื่อแอปส่งอาหารหรือร้านค้าออนไลน์","ชื่อภาษาต่างประเทศ","สิ่งที่เจอบนท้องถนน","ผลไม้","เมืองทั่วโลก","ประเทศ","จังหวัดในไทย","สัตว์","อาหาร","ขนม","เครื่องดื่ม","ชื่อผู้ชาย","ชื่อผู้หญิง","ดารา นักร้อง","อาชีพ","สิ่งของในบ้าน","ของที่อยู่ในกระเป๋า","ยี่ห้อสินค้า","สถานที่ท่องเที่ยว","ตัวการ์ตูน","ผัก","กีฬา","ชื่อเพลง","ชื่อหนังหรือซีรีส์","ของที่ซื้อที่เซเว่น","ยานพาหนะ","ของที่อยู่ในห้องน้ำ"];
+const SP=["คำที่แม่ชอบพูด","ของที่แอบซ่อนในห้องนอน","ชื่อเล่นน่าอาย","คำพูดตอนเมา","สถานที่ห้ามไปกับแฟนเก่า","ของที่แอบเอามาจากโรงแรม","ข้ออ้างตอนไม่อยากไปทำงาน","สิ่งที่ไม่ควรพูดตอนเดทแรก","อาหารที่กินแล้วเสียภาพลักษณ์","สิ่งที่ทำให้นอนไม่หลับ","คำชมที่ฟังแล้วเขิน","ของที่หายบ่อยที่สุด","สิ่งของที่พกในกระเป๋าแฟน","ชื่อดาราไทย","คำด่าเบาๆ แต่เจ็บจี๊ด","ข้ออ้างตอนมาสาย","ของที่ห้ามเอาขึ้นเครื่องบิน","ชื่อที่ตั้งให้หมา","ของที่ไม่ควรให้เป็นของขวัญ","สิ่งที่คนโสดทำคืนวันศุกร์"];
+const LET=["ก.ไก่","ข.ไข่","ค.ควาย","จ.จาน","ช.ช้าง","ซ.โซ่","ด.เด็ก","ต.เต่า","ถ.ถุง","ท.ทหาร","น.หนู","บ.ใบไม้","ป.ปลา","ผ.ผึ้ง","ฟ.ฟัน","พ.พาน","ม.ม้า","ย.ยักษ์","ร.เรือ","ล.ลิง","ว.แหวน","ส.เสือ","ห.หีบ","อ.อ่าง"];
+const CARDS={s:"🕵️ ขโมยคะแนน",w:"🔄 เปลี่ยนหมวด",b:"🚫 บล็อกเพื่อน",d:"🎲 ดับเบิ้ล",h:"🛡️ โล่"};
+const DESC={s:"ขโมย 1 แต้มจากคนที่ตอบถูกรอบนี้",w:"สุ่มหมวดใหม่ และเพิ่มเวลา 5 วินาที",b:"ห้ามเพื่อน 1 คนตอบรอบนี้",d:"คะแนนรอบนี้ x2 (ถูกได้เบิ้ล มั่วโดนหักเบิ้ล)",h:"กันโดนขโมย กันโดนหักแต้ม กันโดนบล็อก (ใช้ก่อนโดน)"};
+function draw(){return rnd(Object.keys(CARDS))}
+const $=id=>document.getElementById(id);
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let room=null,players=[],isHost=false,G=null,draft="",votes={},lastRd=0,err="",code="",TOT=8,tgt="";
+const myId=()=>{const m=players.find(p=>p.isMe);return m&&m.peer};
+const myP=()=>(players.find(p=>p.isMe)||{presence:{}}).presence;
+const nm=id=>{const p=players.find(p=>p.peer===id);return esc(p?p.presence.n:"?")};
+const pick=()=>{const s=Math.random()<.28;return{cat:rnd(s?SP:CATS),sp:s?1:0}};
+const pub=()=>room&&room.presence({g:G});
+
+function makeRoom(code){
+ return new Promise((res,rej)=>{
+  const hid="lparty-"+code;let tbl={},cbs=[],conns={},me="0",cp=null,done=false;
+  const list=()=>Object.keys(tbl).map(id=>({peer:id,isMe:id===me,presence:tbl[id]}));
+  const fire=()=>cbs.forEach(f=>f({peers:list()}));
+  const merge=(id,patch)=>{const t=tbl[id]=tbl[id]||{};for(const k in patch){if(patch[k]===null)delete t[k];else t[k]=patch[k]}};
+  const bc=()=>{Object.values(conns).forEach(c=>c.open&&c.send({t:"tbl",tbl}));fire()};
+  const api={onPeers:f=>cbs.push(f),peers:list,presence:async patch=>{
+    if(me==="0"){merge("0",patch);bc()}else{cp.send({t:"p",patch});merge(me,patch);fire()}}};
+  const fail=m=>{if(!done){done=true;rej(new Error(m))}};
+  setTimeout(()=>fail("timeout"),12000);
+  const hp=new Peer(hid);
+  hp.on("open",()=>{tbl["0"]={};done=true;res(api)});
+  hp.on("connection",c=>{const id="1"+c.peer;conns[id]=c;
+    c.on("open",()=>{tbl[id]=tbl[id]||{};c.send({t:"hi",id})});
+    c.on("data",m=>{if(m&&m.t==="p"){merge(id,m.patch);bc()}});
+    c.on("close",()=>{delete conns[id];delete tbl[id];bc()})});
+  hp.on("error",e=>{
+    if(e.type!=="unavailable-id")return fail(e.type);
+    hp.destroy();
+    const p=new Peer();
+    p.on("error",()=>fail("peer"));
+    p.on("open",()=>{const c=p.connect(hid,{reliable:true});cp=c;
+      c.on("data",m=>{if(m.t==="hi"){me=m.id;if(!done){done=true;res(api)}}else if(m.t==="tbl"){tbl=m.tbl;fire()}});
+      c.on("close",()=>{if(room===api){room=null;players=[];G=null;err="เจ้าของห้องหลุด เข้าห้องใหม่อีกครั้ง";render()}})})
+  });
+ })}
+
+async function join(){
+  const n=$("nm").value.trim().slice(0,12);code=$("cd").value.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,8);
+  if(!n||code.length<3){err="ใส่ชื่อ และรหัสห้องอย่างน้อย 3 ตัว";return render()}
+  try{localStorage.setItem("lpn",n)}catch(e){}
+  err="กำลังเข้าห้อง…";render();
+  try{
+    room=await makeRoom(code);
+    room.onPeers(c=>sync(c.peers));
+    await room.presence({n});
+    sync(room.peers());
+  }catch(e){room=null;err="เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง (ถ้ายังไม่ได้ ลองเปลี่ยนรหัสห้อง)";render()}
+}
+function sync(ps){
+  players=ps.filter(p=>p.presence&&p.presence.n).sort((a,b)=>a.peer<b.peer?-1:a.peer>b.peer?1:0);
+  if(!players.length)return;
+  isHost=players[0].isMe;
+  if(!isHost&&players[0].presence.g)G=players[0].presence.g;
+  render();
+}
+function start(){
+  const hand={};players.forEach(p=>hand[p.peer]=[draw(),draw(),draw()]);
+  G={ph:"answer",rd:1,total:TOT,L:rnd(LET),sc:{},hand,cu:{},sh:[],dbl:[],blk:null,bb:null,st:[],stl:[],res:{},t:Date.now()+35000,...pick()};
+  pub();render();
+}
+function nextRound(){
+  if(G.rd>=G.total)G.ph="end";
+  else{let L;do{L=rnd(LET)}while(L===G.L);
+    players.forEach(p=>{const h=G.hand[p.peer]=G.hand[p.peer]||[draw(),draw()];if(h.length<5)h.push(draw())});
+    Object.assign(G,{rd:G.rd+1,L,ph:"answer",t:Date.now()+35000,blk:null,bb:null,st:[],stl:[],res:{},cu:{},sh:[],dbl:[]},pick())}
+  pub();render();
+}
+function again(){G={ph:"lobby"};pub();render()}
+function hostTick(){
+  if(!G||!G.ph||!G.cu||!G.hand||(G.ph!=="answer"&&G.ph!=="vote"))return;
+  let ch=false;const now=Date.now();
+  players.forEach(p=>{const a=p.presence.act,id=p.peer,h=G.hand[id]||[],A=G.ph==="answer";
+    if(!a||a.r!==G.rd||G.cu[id]||h.indexOf(a.k)<0)return;
+    if(a.k==="w"&&A){Object.assign(G,pick());G.t+=5000}
+    else if(a.k==="b"&&A&&a.t&&a.t!==id&&!G.blk){if(G.sh.indexOf(a.t)<0){G.blk=a.t;G.bb=id}}
+    else if(a.k==="s"&&a.t&&a.t!==id){G.st.push([id,a.t])}
+    else if(a.k==="d"){if(G.dbl.indexOf(id)<0)G.dbl.push(id)}
+    else if(a.k==="h"){if(G.sh.indexOf(id)<0)G.sh.push(id)}
+    else return;
+    h.splice(h.indexOf(a.k),1);G.cu[id]=1;ch=true});
+  if(G.ph==="answer"){
+    if(now>G.t||players.filter(p=>p.peer!==G.blk).every(p=>p.presence.r===G.rd)){G.ph="vote";G.t=now+30000;ch=true}
+  }else if(now>G.t||players.every(p=>p.presence.vr===G.rd)){scoreRound();ch=true}
+  if(ch){pub();render()}
+}
+function scoreRound(){
+  const rd=G.rd,res={},cnt={};
+  players.forEach(p=>{const id=p.peer,pr=p.presence;
+    if(id===G.blk){res[id]=[0,"b",""];return}
+    const a=pr.r===rd?String(pr.a||"").trim():"";
+    if(!a){res[id]=[0,"n",""];return}
+    let y=0,n=0;
+    players.forEach(o=>{if(o.peer===id)return;const v=o.presence.vr===rd&&o.presence.vt?o.presence.vt[id]:undefined;if(v===1)y++;else if(v===0)n++});
+    if(n>y){res[id]=[G.sh.indexOf(id)<0?-1:0,"x",a];return}
+    const k=a.toLowerCase().replace(/\s/g,"");res[id]=[0,"u",a,k];cnt[k]=(cnt[k]||0)+1});
+  Object.values(res).forEach(r=>{if(r[1]==="u"){if(cnt[r[3]]>1){r[0]=1;r[1]="d"}else r[0]=2;r.length=3}});
+  G.dbl.forEach(id=>{if(res[id])res[id][0]*=2});
+  G.stl=G.st.map(([s,t])=>{const ok=res[t]&&res[s]&&(res[t][1]==="u"||res[t][1]==="d")&&G.sh.indexOf(t)<0;if(ok){res[s][0]++;res[t][0]--}return[s,t,ok?1:0]});
+  G.res=res;
+  players.forEach(p=>{G.sc[p.peer]=(G.sc[p.peer]||0)+(res[p.peer]?res[p.peer][0]:0)});
+  G.ph="result";
+}
+function submitA(){room.presence({r:G.rd,a:draft.trim()})}
+function vt(id,v){votes[id]=v;render()}
+function sendV(){room.presence({vr:G.rd,vt:votes})}
+function useCard(c){const t=(c==="s"||c==="b")&&$("tg")?$("tg").value:null;room.presence({act:{k:c,t,r:G.rd}})}
+
+function hdr(t){return`<div class=bar><span>ห้อง ${esc(code)}</span><span>รอบ ${G.rd}/${G.total}</span>${t?"<span id=tm></span>":""}</div>`}
+function cardsV(){
+  const id=myId(),h=(G.hand&&G.hand[id])||[];
+  const notes=(G.sh&&G.sh.length?`<p class=note>🛡️ ${G.sh.map(nm).join(", ")} ใช้โล่</p>`:"")+(G.dbl&&G.dbl.length?`<p class=note>🎲 ${G.dbl.map(nm).join(", ")} เสี่ยงดับเบิ้ล!</p>`:"");
+  if(!h.length)return notes;
+  if(G.cu[id])return notes+`<p class=note>รอบนี้ใช้การ์ดแล้ว (เหลือในมือ ${h.length} ใบ)</p>`;
+  const ok=h.filter(c=>G.ph==="answer"||c==="s"||c==="d"||c==="h");
+  if(!ok.length)return notes;
+  const sel=ok.some(c=>c==="s"||c==="b")?`<select id=tg onchange="tgt=this.value">${players.filter(p=>p.peer!==id).map(p=>`<option value="${esc(p.peer)}" ${p.peer===tgt?"selected":""}>${esc(p.presence.n)}</option>`).join("")}</select>`:"";
+  return notes+`<div class=card><b>การ์ดในมือ (ใช้ได้ 1 ใบต่อรอบ)</b>${sel}${ok.map(c=>`<button class=ghost onclick="useCard('${c}')">${CARDS[c]}<br><small>${DESC[c]}</small></button>`).join("")}</div>`;
+}
+function joinV(A){
+  let n="";try{n=localStorage.getItem("lpn")||""}catch(e){}
+  const c=code||Math.random().toString(36).slice(2,6);
+  A.innerHTML=`<h1>ก.ไก่ ตอบไว! 🔤</h1><p>เล่นกับเพื่อนคนละมือถือ ได้พยัญชนะ 1 ตัว แล้วแข่งตอบตามหมวด</p><div class=card><input id=nm placeholder="ชื่อของคุณ" maxlength=12 value="${esc(n)}"><input id=cd placeholder="รหัสห้อง" maxlength=8 value="${esc(c)}"><p class=note>คนแรกตั้งรหัสอะไรก็ได้ แล้วบอกเพื่อนให้ใส่รหัสเดียวกัน</p></div><button class=hot onclick=join()>เข้าห้อง</button>${err?`<p class=note>${esc(err)}</p>`:""}`;
+}
+function lobbyV(A){
+  A.innerHTML=`<h1>ห้อง <span class=code>${esc(code)}</span></h1><p>ให้เพื่อนเปิดลิงก์เดียวกันแล้วใส่รหัสนี้</p><div class=card>${players.map((p,i)=>`<div>${i?"":"👑 "}${esc(p.presence.n)}${p.isMe?" (คุณ)":""}</div>`).join("")}</div>`+
+  (isHost?`<label>จำนวนรอบ <select onchange="TOT=+this.value">${[5,8,10,15,20].map(v=>`<option ${v===TOT?"selected":""}>${v}</option>`).join("")}</select></label><button class=hot onclick=start() ${players.length<2?"disabled":""}>เริ่มเกม (${players.length} คน)</button><p class=note>เริ่มแล้วทุกคนจะได้การ์ด 3 ใบ และจั่วเพิ่มทุกรอบ (ถือได้สูงสุด 5 ใบ)</p>`:`<p>รอ ${nm(players[0].peer)} กดเริ่มเกม…</p>`);
+}
+function answerV(A){
+  const id=myId(),blocked=G.blk===id,sub=myP().r===G.rd;
+  A.innerHTML=hdr(1)+`<div class=letter>${esc(G.L[0])}<small>${esc(G.L)}</small></div><div class=cat>${G.sp?"⭐ หมวดพิเศษ: ":""}${esc(G.cat)} ที่ขึ้นต้นด้วย ${esc(G.L)}</div>`+
+  (G.blk?`<p class=note>🚫 ${nm(G.blk)} โดนบล็อกรอบนี้ (โดย ${nm(G.bb)})</p>`:"")+
+  (blocked?`<p class=card>คุณโดนบล็อก! รอบนี้ห้ามตอบ 😭</p>`:`<input id=ans maxlength=24 placeholder="พิมพ์คำตอบ" value="${esc(draft)}" oninput="draft=this.value" ${sub?"disabled":""}><button class=hot onclick=submitA() ${sub?"disabled":""}>${sub?"ส่งแล้ว ✓":"ส่งคำตอบ"}</button>`)+cardsV()+`<p class=note id=who></p>`;
+}
+function voteV(A){
+  const id=myId(),sent=myP().vr===G.rd;
+  const rows=players.filter(p=>p.peer!==id&&p.peer!==G.blk&&p.presence.r===G.rd&&p.presence.a);
+  A.innerHTML=hdr(1)+`<h2>โหวตคำตอบ</h2><p>${esc(G.cat)} ขึ้นต้นด้วย ${esc(G.L)} รู้จักมั้ย ใช้ได้มั้ย?</p>`+
+  (rows.map(p=>{const k=esc(p.peer);return`<div class=card><div class=ans>${esc(p.presence.a)}</div><small>${esc(p.presence.n)}</small><div class=row><button class="${votes[p.peer]===1?"on":"ghost"}" onclick="vt('${k}',1)" ${sent?"disabled":""}>✅ ใช้ได้</button><button class="${votes[p.peer]===0?"on bad":"ghost"}" onclick="vt('${k}',0)" ${sent?"disabled":""}>❌ มั่ว</button></div></div>`}).join("")||`<p class=card>ไม่มีคำตอบให้โหวต</p>`)+
+  `<button class=hot onclick=sendV() ${sent?"disabled":""}>${sent?"ส่งโหวตแล้ว ✓":"ส่งโหวต"}</button>`+cardsV()+`<p class=note id=who></p>`;
+}
+function resultV(A){
+  const T={u:"🌟 ไม่ซ้ำใคร",d:"🤝 ตอบซ้ำ",x:"❌ มั่ว",n:"⏰ ไม่ได้ตอบ",b:"🚫 โดนบล็อก"};
+  const rk=[...players].sort((a,b)=>(G.sc[b.peer]||0)-(G.sc[a.peer]||0));
+  A.innerHTML=hdr(0)+`<h2>ผลรอบนี้</h2>`+rk.map(p=>{const r=G.res[p.peer]||[0,"n",""];return`<div class=card><div class=rowb><b>${esc(p.presence.n)}</b><b>${G.sc[p.peer]||0} แต้ม</b></div><div class=ans>${esc(r[2])||"—"}</div><small>${T[r[1]]} (${r[0]>0?"+":""}${r[0]})${(G.dbl||[]).indexOf(p.peer)>=0?" 🎲x2":""}${(G.sh||[]).indexOf(p.peer)>=0?" 🛡️":""}</small></div>`}).join("")+
+  (G.stl||[]).map(([s,t,o])=>`<p class=note>🕵️ ${nm(s)} ขโมยจาก ${nm(t)} ${o?"สำเร็จ":"แต่ไม่ได้อะไร"}</p>`).join("")+
+  (isHost?`<button class=hot onclick=nextRound()>${G.rd>=G.total?"ดูผลสรุป":"รอบต่อไป"}</button>`:`<p class=note>รอเจ้าของห้องกดต่อ…</p>`);
+}
+function endV(A){
+  const rk=[...players].sort((a,b)=>(G.sc[b.peer]||0)-(G.sc[a.peer]||0));
+  A.innerHTML=`<h1>🏆 ${esc(rk[0].presence.n)} ชนะ!</h1><div class=card>${rk.map((p,i)=>`<div class=rowb><span>${i+1}. ${esc(p.presence.n)}</span><b>${G.sc[p.peer]||0}</b></div>`).join("")}</div>`+(isHost?`<button class=hot onclick=again()>เล่นอีกรอบ</button>`:`<p class=note>รอเจ้าของห้องเริ่มรอบใหม่…</p>`);
+}
+function render(){
+  const A=$("app");
+  if(!room||!players.length){joinV(A);return}
+  if(G&&G.rd&&G.rd!==lastRd){lastRd=G.rd;draft="";votes={}}
+  const ph=G?G.ph:"lobby";
+  ({lobby:lobbyV,answer:answerV,vote:voteV,result:resultV,end:endV}[ph]||lobbyV)(A);
+  tickUI();
+}
+function tickUI(){
+  if(!G)return;
+  const tm=$("tm");if(tm&&G.t)tm.textContent=Math.max(0,Math.ceil((G.t-Date.now())/1000))+" วิ";
+  const w=$("who");if(w){const k=G.ph==="answer"?"r":"vr";w.textContent="ส่งแล้ว "+players.filter(p=>p.presence[k]===G.rd).length+"/"+players.length+" คน"}
+}
+setInterval(()=>{if(!room)return;if(isHost)hostTick();tickUI()},500);
+render();
+</script>
+</body>
+</html>
